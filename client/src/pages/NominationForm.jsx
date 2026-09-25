@@ -148,11 +148,19 @@ export default function NominationForm() {
     if (name === "nominationType") {
       setForm((prev) => {
         const isWomen = value === "women icon of the year";
-        const isInvalidType = !isWomen && (prev.participationType === "attend as ramp show" || prev.participationType === "attend as special guest");
+        const isInvalidType = !isWomen && (
+          prev.participationType === "attend as ramp show" ||
+          prev.participationType === "attend as special guest" ||
+          prev.participationType === "award + ramp show"
+        );
+        let nextParticipation = isInvalidType ? "nominated as award" : prev.participationType;
+        if (isWomen && prev.participationType === "attend as speaker") {
+          nextParticipation = "award + ramp show";
+        }
         return {
           ...prev,
           nominationType: value,
-          participationType: isInvalidType ? "nominated as award" : prev.participationType,
+          participationType: nextParticipation,
         };
       });
       return;
@@ -364,18 +372,21 @@ export default function NominationForm() {
 
     const isWomenSelected = form.nominationType === "women icon of the year";
 
-    const participationOptions = [
-      { id: "nominated as award", prefix: "Apply for", highlight: "Awarded", primary: true },
-      { id: "attend as speaker", prefix: "Attend as", highlight: "Speaker", primary: false },
-      { id: "attend as exhibitor", prefix: "Attend as", highlight: "Exhibitor", primary: false },
-      { id: "attend as sponsor", prefix: "Attend as", highlight: "Sponsor", primary: false },
-      ...(isWomenSelected
-        ? [
-            { id: "attend as ramp show", prefix: "Participate in", highlight: "Ramp Show", primary: false },
-            { id: "attend as special guest", prefix: "Attend as", highlight: "Special Guest", primary: false },
-          ]
-        : []),
-    ];
+    const participationOptions = isWomenSelected
+      ? [
+          { id: "nominated as award", prefix: "Apply for", highlight: "Awarded", primary: true },
+          { id: "award + ramp show", prefix: "Apply for", highlight: "Award + Ramp Show", primary: false },
+          { id: "attend as exhibitor", prefix: "Attend as", highlight: "Exhibitor", primary: false },
+          { id: "attend as sponsor", prefix: "Attend as", highlight: "Sponsor", primary: false },
+          { id: "attend as ramp show", prefix: "Participate in", highlight: "Ramp Show", primary: false },
+          { id: "attend as special guest", prefix: "Attend as", highlight: "Special Guest", primary: false },
+        ]
+      : [
+          { id: "nominated as award", prefix: "Apply for", highlight: "Awarded", primary: true },
+          { id: "attend as speaker", prefix: "Attend as", highlight: "Speaker", primary: false },
+          { id: "attend as exhibitor", prefix: "Attend as", highlight: "Exhibitor", primary: false },
+          { id: "attend as sponsor", prefix: "Attend as", highlight: "Sponsor", primary: false },
+        ];
 
     return (
     <PageHero
@@ -758,7 +769,8 @@ export default function NominationForm() {
               <>
                 <div className="md:col-span-2 p-5 sm:p-8 rounded-3xl bg-gradient-to-br from-white/5 to-transparent border border-white/10 flex flex-col items-center">
                   <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-[#d4af37]/20 flex items-center justify-center mb-6 border border-[#d4af37]/30 shadow-inner text-2xl sm:text-3xl">
-                    {form.participationType === "attend as ramp show" ? "💃" :
+                    {form.participationType === "award + ramp show" ? "🏆💃" :
+                     form.participationType === "attend as ramp show" ? "💃" :
                      form.participationType === "attend as special guest" ? "🌟" :
                      form.participationType === "attend as speaker" ? "🎤" :
                      form.participationType === "attend as exhibitor" ? "🏢" :
@@ -767,6 +779,7 @@ export default function NominationForm() {
                   <h3 className="text-xl sm:text-2xl font-bold text-[#d4af37] mb-2 uppercase tracking-tighter text-center">Registration Info</h3>
                   <p className="text-gray-400 text-xs sm:text-sm mb-8 text-center max-w-md italic">
                     You are registering to attend as {
+                      form.participationType === "award + ramp show" ? "an Award + Ramp Show Participant" :
                       form.participationType === "attend as ramp show" ? "a Ramp Show Participant" :
                       form.participationType === "attend as special guest" ? "a Special Guest" :
                       form.participationType === "attend as speaker" ? "a Speaker" :

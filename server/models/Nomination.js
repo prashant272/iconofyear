@@ -11,6 +11,7 @@ const nominationSchema = new mongoose.Schema(
         "attend as sponsor",
         "attend as ramp show",
         "attend as special guest",
+        "award + ramp show",
       ],
       required: true,
       default: "nominated as award",

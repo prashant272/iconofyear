@@ -40,6 +40,7 @@ const PARTICIPATION_TYPE_FILTER_OPTIONS = [
   { value: "attend as sponsor", label: "Sponsor" },
   { value: "attend as ramp show", label: "Ramp Show" },
   { value: "attend as special guest", label: "Special Guest" },
+  { value: "award + ramp show", label: "Award + Ramp Show" },
 ];
 
 const EVENT_FILTER_OPTIONS = [
@@ -415,6 +416,7 @@ export default function AdminDashboard() {
                     n.participationType === "attend as sponsor" ? "bg-emerald-500/10 border-emerald-500/20 text-emerald-400" :
                     n.participationType === "attend as ramp show" ? "bg-rose-500/10 border-rose-500/20 text-rose-400" :
                     n.participationType === "attend as special guest" ? "bg-amber-500/10 border-amber-500/20 text-amber-400" :
+                    n.participationType === "award + ramp show" ? "bg-fuchsia-500/10 border-fuchsia-500/20 text-fuchsia-400" :
                     "bg-pink-500/10 border-pink-500/20 text-pink-400"
                   }`}>
                     <span className="text-sm">{
@@ -423,7 +425,8 @@ export default function AdminDashboard() {
                       n.participationType === "attend as exhibitor" ? "🏢" :
                       n.participationType === "attend as sponsor" ? "💎" :
                       n.participationType === "attend as ramp show" ? "💃" :
-                      n.participationType === "attend as special guest" ? "🌟" : "📝"
+                      n.participationType === "attend as special guest" ? "🌟" :
+                      n.participationType === "award + ramp show" ? "🏆💃" : "📝"
                     }</span>
                     {
                       n.participationType === "nominated as award" ? "Award" :
@@ -432,6 +435,7 @@ export default function AdminDashboard() {
                       n.participationType === "attend as sponsor" ? "Sponsor" :
                       n.participationType === "attend as ramp show" ? "Ramp Show" :
                       n.participationType === "attend as special guest" ? "Special Guest" :
+                      n.participationType === "award + ramp show" ? "Award + Ramp Show" :
                       n.participationType
                     }
                   </div>
@@ -1184,6 +1188,7 @@ export default function AdminDashboard() {
                             <option value="attend as sponsor" className="bg-[#0f172a] text-white">Sponsor</option>
                             <option value="attend as ramp show" className="bg-[#0f172a] text-white">Ramp Show</option>
                             <option value="attend as special guest" className="bg-[#0f172a] text-white">Special Guest</option>
+                            <option value="award + ramp show" className="bg-[#0f172a] text-white">Award + Ramp Show</option>
                           </select>
                         </div>
                         <div>

@@ -35,6 +35,7 @@ export const nominationSchema = [
             "attend as sponsor",
             "attend as ramp show",
             "attend as special guest",
+            "award + ramp show",
         ])
         .withMessage("Invalid participation type"),
     body("nomineeName").trim().notEmpty().withMessage("Name is required"),
