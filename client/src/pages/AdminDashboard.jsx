@@ -38,6 +38,14 @@ const PARTICIPATION_TYPE_FILTER_OPTIONS = [
   { value: "attend as speaker", label: "Speaker" },
   { value: "attend as exhibitor", label: "Exhibitor" },
   { value: "attend as sponsor", label: "Sponsor" },
+  { value: "attend as ramp show", label: "Ramp Show" },
+  { value: "attend as special guest", label: "Special Guest" },
+];
+
+const EVENT_FILTER_OPTIONS = [
+  { value: "all", label: "All Events" },
+  { value: "icon of the year award", label: "Icon of the Year Award" },
+  { value: "women icon of the year", label: "Women Icon of the Year" },
 ];
 
 const LOCATION_FILTER_OPTIONS = [
@@ -104,6 +112,7 @@ export default function AdminDashboard() {
   const [error, setError] = useState("");
 
   const [statusFilter, setStatusFilter] = useState("all");
+  const [eventFilter, setEventFilter] = useState("all");
   const [participationTypeFilter, setParticipationTypeFilter] = useState("all");
   const [locationFilter, setLocationFilter] = useState("all");
   const [searchTerm, setSearchTerm] = useState("");
@@ -189,6 +198,16 @@ export default function AdminDashboard() {
       filtered = filtered.filter((n) => (n.status || "nominated") === statusFilter);
     }
 
+    if (eventFilter !== "all") {
+      filtered = filtered.filter((n) => {
+        const norm = (n.nominationType || "icon of the year award").toLowerCase();
+        if (eventFilter === "women icon of the year") {
+          return norm.includes("women");
+        }
+        return !norm.includes("women");
+      });
+    }
+
     if (participationTypeFilter !== "all") {
       filtered = filtered.filter((n) => n.participationType === participationTypeFilter);
     }
@@ -228,7 +247,7 @@ export default function AdminDashboard() {
     });
 
     setFilteredNominations(filtered);
-  }, [nominations, statusFilter, participationTypeFilter, locationFilter, searchTerm, sortOrder]);
+  }, [nominations, statusFilter, eventFilter, participationTypeFilter, locationFilter, searchTerm, sortOrder]);
 
   const paymentSummary = useMemo(() => {
     const summary = {
@@ -349,6 +368,7 @@ export default function AdminDashboard() {
           <thead>
             <tr className="sticky top-0 z-40">
               {[
+                { label: "Event / Summit", width: "190px" },
                 { label: "Participation", width: "180px" },
                 { label: "Category", width: "250px" },
                 { label: "Direct Contact", width: "180px" },
@@ -378,17 +398,42 @@ export default function AdminDashboard() {
             {filteredNominations.map((n, idx) => (
               <tr key={n._id} className="group/row hover:bg-slate-800/40 transition-colors duration-300">
                 <td className="px-4 py-2.5">
-                  <div className={`inline-flex items-center gap-2 px-3 py-1 rounded-lg border text-[10px] font-black uppercase tracking-widest ${n.participationType === "nominated as award" ? "bg-indigo-500/10 border-indigo-500/20 text-indigo-400" :
+                  <div className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-lg border text-[10px] font-black uppercase tracking-widest ${
+                    (n.nominationType || "").toLowerCase().includes("women")
+                      ? "bg-pink-500/10 border-pink-500/20 text-pink-400"
+                      : "bg-[#d4af37]/10 border-[#d4af37]/20 text-[#d4af37]"
+                  }`}>
+                    <span className="text-sm">{(n.nominationType || "").toLowerCase().includes("women") ? "👑" : "🏆"}</span>
+                    {(n.nominationType || "").toLowerCase().includes("women") ? "Women Icon" : "Icon of the Year"}
+                  </div>
+                </td>
+                <td className="px-4 py-2.5">
+                  <div className={`inline-flex items-center gap-2 px-3 py-1 rounded-lg border text-[10px] font-black uppercase tracking-widest ${
+                    n.participationType === "nominated as award" ? "bg-indigo-500/10 border-indigo-500/20 text-indigo-400" :
                     n.participationType === "attend as speaker" ? "bg-cyan-500/10 border-cyan-500/20 text-cyan-400" :
-                      n.participationType === "attend as exhibitor" ? "bg-purple-500/10 border-purple-500/20 text-purple-400" :
-                        "bg-pink-500/10 border-pink-500/20 text-pink-400"
-                    }`}>
+                    n.participationType === "attend as exhibitor" ? "bg-purple-500/10 border-purple-500/20 text-purple-400" :
+                    n.participationType === "attend as sponsor" ? "bg-emerald-500/10 border-emerald-500/20 text-emerald-400" :
+                    n.participationType === "attend as ramp show" ? "bg-rose-500/10 border-rose-500/20 text-rose-400" :
+                    n.participationType === "attend as special guest" ? "bg-amber-500/10 border-amber-500/20 text-amber-400" :
+                    "bg-pink-500/10 border-pink-500/20 text-pink-400"
+                  }`}>
                     <span className="text-sm">{
                       n.participationType === "nominated as award" ? "🏆" :
-                        n.participationType === "attend as speaker" ? "🎤" :
-                          n.participationType === "attend as exhibitor" ? "🏢" : "💎"
+                      n.participationType === "attend as speaker" ? "🎤" :
+                      n.participationType === "attend as exhibitor" ? "🏢" :
+                      n.participationType === "attend as sponsor" ? "💎" :
+                      n.participationType === "attend as ramp show" ? "💃" :
+                      n.participationType === "attend as special guest" ? "🌟" : "📝"
                     }</span>
-                    {n.participationType?.split(' ')[0]}
+                    {
+                      n.participationType === "nominated as award" ? "Award" :
+                      n.participationType === "attend as speaker" ? "Speaker" :
+                      n.participationType === "attend as exhibitor" ? "Exhibitor" :
+                      n.participationType === "attend as sponsor" ? "Sponsor" :
+                      n.participationType === "attend as ramp show" ? "Ramp Show" :
+                      n.participationType === "attend as special guest" ? "Special Guest" :
+                      n.participationType
+                    }
                   </div>
                 </td>
                 <td className="px-4 py-2.5">
@@ -954,9 +999,22 @@ export default function AdminDashboard() {
 
             {/* Dynamic Global Filters & Search Panel (Hidden on Analytics/Settings tabs) */}
             {activeTab !== "analytics" && activeTab !== "admins" && activeTab !== "previous-editions" && activeTab !== "upcoming-editions" && activeTab !== "gallery" && (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-3 mb-4 bg-slate-900 py-3.5 px-5 rounded-2xl border border-white/10 shadow-[0_0_40px_rgba(0,0,0,0.3)]">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-3 mb-4 bg-slate-900 py-3.5 px-5 rounded-2xl border border-white/10 shadow-[0_0_40px_rgba(0,0,0,0.3)]">
                 {activeTab !== "inquiries" ? (
                   <>
+                    <div className="flex flex-col gap-1">
+                      <label className="text-[10px] text-[#d4af37] font-black uppercase tracking-widest ml-1">Event / Summit</label>
+                      <select
+                        value={eventFilter}
+                        onChange={(e) => setEventFilter(e.target.value)}
+                        className="w-full bg-[#020817] border border-white/10 rounded-lg px-3 py-2 text-[11px] font-black uppercase tracking-widest text-white/80 focus:outline-none focus:border-indigo-500 transition-all appearance-none cursor-pointer"
+                      >
+                        {EVENT_FILTER_OPTIONS.map((s) => (
+                          <option key={s.value} value={s.value} className="bg-[#0f172a]">{s.label}</option>
+                        ))}
+                      </select>
+                    </div>
+
                     <div className="flex flex-col gap-1">
                       <label className="text-[10px] text-indigo-400 font-black uppercase tracking-widest ml-1">Filter Status</label>
                       <select
@@ -1042,6 +1100,7 @@ export default function AdminDashboard() {
                     <button
                       onClick={() => {
                         setStatusFilter("all");
+                        setEventFilter("all");
                         setParticipationTypeFilter("all");
                         setLocationFilter("all");
                         setSearchTerm("");
@@ -1102,8 +1161,30 @@ export default function AdminDashboard() {
                       </h3>
                       <div className="space-y-4">
                         <div>
+                          <label className="text-[9px] font-black uppercase tracking-widest text-[#d4af37] ml-1 mb-1.5 block">Select Award / Summit Event</label>
+                          <select
+                            className={inputClass}
+                            value={editForm.nominationType || "icon of the year award"}
+                            onChange={(e) => setEditForm({ ...editForm, nominationType: e.target.value })}
+                          >
+                            <option value="icon of the year award" className="bg-[#0f172a] text-white">Icon of the Year Award</option>
+                            <option value="women icon of the year" className="bg-[#0f172a] text-white">Women Icon of the Year</option>
+                          </select>
+                        </div>
+                        <div>
                           <label className="text-[9px] font-black uppercase tracking-widest text-white/40 ml-1 mb-1.5 block">Participation Type</label>
-                          <input className={inputClass} value={editForm.participationType || ""} onChange={(e) => setEditForm({ ...editForm, participationType: e.target.value })} />
+                          <select
+                            className={inputClass}
+                            value={editForm.participationType || "nominated as award"}
+                            onChange={(e) => setEditForm({ ...editForm, participationType: e.target.value })}
+                          >
+                            <option value="nominated as award" className="bg-[#0f172a] text-white">Award Nomination</option>
+                            <option value="attend as speaker" className="bg-[#0f172a] text-white">Speaker</option>
+                            <option value="attend as exhibitor" className="bg-[#0f172a] text-white">Exhibitor</option>
+                            <option value="attend as sponsor" className="bg-[#0f172a] text-white">Sponsor</option>
+                            <option value="attend as ramp show" className="bg-[#0f172a] text-white">Ramp Show</option>
+                            <option value="attend as special guest" className="bg-[#0f172a] text-white">Special Guest</option>
+                          </select>
                         </div>
                         <div>
                           <label className="text-[9px] font-black uppercase tracking-widest text-white/40 ml-1 mb-1.5 block">Field (Industry)</label>
@@ -1269,6 +1350,12 @@ export default function AdminDashboard() {
                       <p className="text-base md:text-lg font-bold text-indigo-200/60 uppercase tracking-widest mt-1">{viewingNomination.organization}</p>
                     </div>
                     <div className="flex flex-wrap gap-2">
+                      <div className="bg-[#d4af37]/10 border border-[#d4af37]/20 px-4 py-2 rounded-xl">
+                        <p className="text-[8px] font-black uppercase tracking-widest text-[#d4af37]/60 mb-1">Award / Summit Event</p>
+                        <p className="text-xs font-black uppercase tracking-widest text-[#d4af37]">
+                          {(viewingNomination.nominationType || "").toLowerCase().includes("women") ? "Women Icon of the Year" : "Icon of the Year Award"}
+                        </p>
+                      </div>
                       <div className="bg-indigo-500/10 border border-indigo-500/20 px-4 py-2 rounded-xl">
                         <p className="text-[8px] font-black uppercase tracking-widest text-indigo-400/60 mb-1">Application Status</p>
                         <p className="text-xs font-black uppercase tracking-widest text-indigo-400">{viewingNomination.status || 'Nominated'}</p>
@@ -1288,6 +1375,11 @@ export default function AdminDashboard() {
                           <span className="p-1.5 bg-[#d4af37]/10 rounded-lg text-xs">🏅</span> Classification
                         </h3>
                         <div className="grid sm:grid-cols-2 gap-5">
+                          <DetailItem
+                            label="Award / Summit Event"
+                            val={(viewingNomination.nominationType || "").toLowerCase().includes("women") ? "Women Icon of the Year" : "Icon of the Year Award"}
+                            color="text-[#d4af37]"
+                          />
                           {viewingNomination.field && <DetailItem label="Field" val={viewingNomination.field} />}
                           <DetailItem label="Category" val={viewingNomination.category} />
                           <DetailItem label="Sub Category" val={viewingNomination.subCategory} />

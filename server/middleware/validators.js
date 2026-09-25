@@ -28,7 +28,14 @@ export const loginSchema = [
 
 export const nominationSchema = [
     body("participationType")
-        .isIn(["nominated as award", "attend as speaker", "attend as exhibitor", "attend as sponsor"])
+        .isIn([
+            "nominated as award",
+            "attend as speaker",
+            "attend as exhibitor",
+            "attend as sponsor",
+            "attend as ramp show",
+            "attend as special guest",
+        ])
         .withMessage("Invalid participation type"),
     body("nomineeName").trim().notEmpty().withMessage("Name is required"),
     body("organization").trim().notEmpty().withMessage("Organization name is required"),

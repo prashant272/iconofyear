@@ -85,7 +85,7 @@ function Hero() {
                     <h2 className="text-[16px] xs:text-[20px] sm:text-2xl md:text-3xl lg:text-4xl xl:text-5xl font-black font-heading tracking-tight leading-tight text-white px-2 [text-shadow:_0_0_30px_rgba(184,134,11,0.4),_0_0_60px_rgba(196,30,58,0.2)]">
                         <span className="inline-block whitespace-nowrap text-center">
                             <span className="bg-gradient-to-r from-[#F7E4BE] via-[#D4A96A] to-[#B8860B] bg-clip-text text-transparent inline-block font-black filter drop-shadow-[0_0_50px_rgba(184,134,11,0.8)]">
-                                Women Icon of The Year
+                                Icon of The Year Awards
                             </span>{" "}
                             <span className="text-[#EEF2FF] drop-shadow-[0_0_15px_rgba(212,169,106,0.4)]">2026</span>
                         </span>

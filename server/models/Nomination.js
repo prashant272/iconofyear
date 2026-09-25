@@ -4,7 +4,14 @@ const nominationSchema = new mongoose.Schema(
   {
     participationType: {
       type: String,
-      enum: ["nominated as award", "attend as speaker", "attend as exhibitor", "attend as sponsor"],
+      enum: [
+        "nominated as award",
+        "attend as speaker",
+        "attend as exhibitor",
+        "attend as sponsor",
+        "attend as ramp show",
+        "attend as special guest",
+      ],
       required: true,
       default: "nominated as award",
     },
@@ -210,8 +217,23 @@ const nominationSchema = new mongoose.Schema(
     },
     nominationType: {
       type: String,
-      enum: ["education", "healthcare", "international education", "internationalEducation", "indiaBrandIcon", "India Brand Icon", "indianIconOfTheYear", "Indian Icon of the year"],
-      default: "indianIconOfTheYear",
+      enum: [
+        "education",
+        "healthcare",
+        "international education",
+        "internationalEducation",
+        "indiaBrandIcon",
+        "India Brand Icon",
+        "indianIconOfTheYear",
+        "Indian Icon of the year",
+        "icon of the year award",
+        "Icon of the Year Award",
+        "women icon of the year",
+        "Women Icon of the year",
+        "Women Icon of The Year",
+        "womenIconOfTheYear",
+      ],
+      default: "icon of the year award",
     },
     pdfUrl: {
       type: String,

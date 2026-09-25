@@ -12,7 +12,8 @@ const upload = multer({
             cb(null, { fieldName: file.fieldname });
         },
         key: function (req, file, cb) {
-            const type = req.body.nominationType;
+            const rawType = req.body.nominationType || "general";
+            const type = String(rawType).trim().replace(/\s+/g, "_");
             const fileName = `${Date.now()}_${path.basename(file.originalname)}`;
             const fullPath = `${type}/${fileName}`;
             cb(null, fullPath);

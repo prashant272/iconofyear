@@ -12,10 +12,7 @@ export function getBaseUrl() {
     return raw.endsWith("/api") ? raw.slice(0, -4) : raw;
   }
 
-  // 2. If no .env is found, fallback to hardcoded production URL
-  if (import.meta.env?.PROD) {
-    return "https://api.indianiconsoftheyearawards.com";
-  }
+
 
 
 

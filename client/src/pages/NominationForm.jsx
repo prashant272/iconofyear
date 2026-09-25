@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo, useRef } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useNavigate, useParams, useLocation } from "react-router-dom";
 import { FiArrowLeft, FiX, FiRefreshCcw } from "react-icons/fi";
 import { Crown } from "lucide-react";
 import { createNomination, fetchNominationById, updateUserNomination } from "../services/api.js";
@@ -7,8 +7,30 @@ import { useAuth } from "../context/AuthContext.jsx";
 import { PageHero } from "../components/Motion.jsx";
 import categoryMap from "../constants/categoryMap.js";
 
+const EVENT_OPTIONS = [
+  {
+    id: "icon of the year award",
+    title: "Icon of the Year Award",
+    subtitle: "National Excellence & Leadership Summit 2026",
+    icon: "🏆",
+  },
+  {
+    id: "women icon of the year",
+    title: "Women Icon of the Year",
+    subtitle: "Celebrating Women Who Inspire Change 2026",
+    icon: "👑",
+  },
+];
+
+const normalizeNominationType = (type) => {
+  if (!type) return "icon of the year award";
+  const lower = String(type).toLowerCase();
+  if (lower.includes("women")) return "women icon of the year";
+  return "icon of the year award";
+};
+
 const initialForm = {
-  nominationType: "indianIconOfTheYear",
+  nominationType: "icon of the year award",
   participationType: "nominated as award",
 
   field: "",
@@ -82,6 +104,7 @@ export default function NominationForm() {
           setForm(prev => ({
             ...prev,
             ...data,
+            nominationType: normalizeNominationType(data.nominationType),
             subCategory: data.subCategory || "",
             otherSubCategory: data.otherSubCategory || "",
             acceptTerms: false,
@@ -96,6 +119,21 @@ export default function NominationForm() {
     }
   }, [id, token, isEditMode]);
 
+  const location = useLocation();
+
+  useEffect(() => {
+    if (!isEditMode) {
+      const searchParams = new URLSearchParams(location.search);
+      const eventParam = searchParams.get("event") || searchParams.get("edition");
+      if (eventParam) {
+        setForm(prev => ({
+          ...prev,
+          nominationType: normalizeNominationType(eventParam),
+        }));
+      }
+    }
+  }, [location.search, isEditMode]);
+
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
 
@@ -107,9 +145,23 @@ export default function NominationForm() {
       });
     }
 
+    if (name === "nominationType") {
+      setForm((prev) => {
+        const isWomen = value === "women icon of the year";
+        const isInvalidType = !isWomen && (prev.participationType === "attend as ramp show" || prev.participationType === "attend as special guest");
+        return {
+          ...prev,
+          nominationType: value,
+          participationType: isInvalidType ? "nominated as award" : prev.participationType,
+        };
+      });
+      return;
+    }
+
     if (name === "participationType") {
-      setForm(() => ({
+      setForm((prev) => ({
         ...initialForm,
+        nominationType: prev.nominationType,
         participationType: value,
       }));
       setFieldErrors({});
@@ -191,6 +243,10 @@ export default function NominationForm() {
     ];
     const requiredOther = ["nomineeName", "organization", "designation", "mobile", "email"];
 
+    if (!form.nominationType) {
+      errors.nominationType = "Event is required";
+    }
+
     const list = form.participationType === "nominated as award" ? requiredAward : requiredOther;
 
     list.forEach(field => {
@@ -232,6 +288,7 @@ export default function NominationForm() {
       const requiredOther = ["nomineeName", "organization", "designation", "mobile", "email"];
       const list = form.participationType === "nominated as award" ? requiredAward : requiredOther;
 
+      if (!form.nominationType) currentErrors.nominationType = true;
       list.forEach(f => { if (!form[f] || (typeof form[f] === "string" && form[f].trim() === "")) currentErrors[f] = true; });
 
       const phoneRegex = /^[\d\s\+\-\(\)]{7,20}$/;
@@ -305,16 +362,33 @@ export default function NominationForm() {
     );
   }
 
-  return (
+    const isWomenSelected = form.nominationType === "women icon of the year";
+
+    const participationOptions = [
+      { id: "nominated as award", prefix: "Apply for", highlight: "Awarded", primary: true },
+      { id: "attend as speaker", prefix: "Attend as", highlight: "Speaker", primary: false },
+      { id: "attend as exhibitor", prefix: "Attend as", highlight: "Exhibitor", primary: false },
+      { id: "attend as sponsor", prefix: "Attend as", highlight: "Sponsor", primary: false },
+      ...(isWomenSelected
+        ? [
+            { id: "attend as ramp show", prefix: "Participate in", highlight: "Ramp Show", primary: false },
+            { id: "attend as special guest", prefix: "Attend as", highlight: "Special Guest", primary: false },
+          ]
+        : []),
+    ];
+
+    return (
     <PageHero
       colorScheme="gold"
       className=""
-      badge="Official Nomination Registry 2026"
-      icon="🏆"
-      title="Indian Icon of The Year 2026"
+      badge={isWomenSelected ? "Women Icon of The Year 2026" : "Official Nomination Registry 2026"}
+      icon={isWomenSelected ? "👑" : "🏆"}
+      title={isWomenSelected ? "Women Icon of The Year 2026" : "Indian Icon of The Year 2026"}
       subtitle={isEditMode
         ? "Refine your submission to ensure every detail shines for the jury review."
-        : "Salute the icons, crown the changemakers. Nominate yourself or your organization for ultimate excellence award"
+        : isWomenSelected
+          ? "Celebrating Women Who Inspire Change. Bolder, Braver, Brighter Together. Nominate yourself or your organization."
+          : "Salute the icons, crown the changemakers. Nominate yourself or your organization for ultimate excellence award"
       }
     >
       <div className="max-w-5xl mx-auto px-4 pb-32 relative z-10">
@@ -343,26 +417,92 @@ export default function NominationForm() {
         <div className="glass-card p-4 sm:p-6 md:p-10 shadow-[0_30px_60px_-15px_rgba(0,0,0,0.5)]">
           <form onSubmit={handleSubmit} className="grid md:grid-cols-2 gap-8">
 
+            {/* Select Award / Summit Event */}
+            <div className="md:col-span-2 space-y-4">
+              <div className="flex items-center justify-between">
+                <label className="text-sm font-bold text-[#d4af37] uppercase tracking-widest pl-1 flex items-center gap-1.5">
+                  Select Award / Summit Event <span className="text-red-500 font-bold">*</span>
+                </label>
+                {fieldErrors.nominationType && (
+                  <span className="text-xs text-red-400 font-bold tracking-wide">
+                    {fieldErrors.nominationType}
+                  </span>
+                )}
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                {EVENT_OPTIONS.map((evt) => {
+                  const isSelected = form.nominationType === evt.id;
+                  return (
+                    <label
+                      key={evt.id}
+                      className={`group relative flex items-center gap-4 p-4 sm:p-5 rounded-2xl border-2 cursor-pointer transition-all duration-300 overflow-hidden ${
+                        isSelected
+                          ? "bg-gradient-to-r from-[#d4af37]/20 via-[#d4af37]/10 to-white/5 border-[#d4af37] shadow-[0_10px_30px_rgba(212,175,55,0.25)] ring-2 ring-[#d4af37]/30"
+                          : "bg-white/5 border-white/10 hover:bg-white/10 hover:border-[#d4af37]/40"
+                      }`}
+                    >
+                      <input
+                        type="radio"
+                        name="nominationType"
+                        value={evt.id}
+                        checked={isSelected}
+                        onChange={handleChange}
+                        className="hidden"
+                      />
+
+                      {/* Glowing radio marker */}
+                      <div
+                        className={`w-6 h-6 rounded-full border-2 flex items-center justify-center shrink-0 transition-all ${
+                          isSelected
+                            ? "border-[#d4af37] bg-[#d4af37] shadow-[0_0_10px_rgba(212,175,55,0.5)]"
+                            : "border-white/30 bg-transparent group-hover:border-[#d4af37]/60"
+                        }`}
+                      >
+                        {isSelected && <div className="w-2.5 h-2.5 rounded-full bg-black" />}
+                      </div>
+
+                      <div className="text-2xl sm:text-3xl shrink-0 p-2.5 rounded-xl bg-white/5 border border-white/10 group-hover:scale-110 transition-transform">
+                        {evt.icon}
+                      </div>
+
+                      <div className="flex-1 min-w-0">
+                        <h4
+                          className={`text-sm sm:text-base font-black tracking-tight uppercase leading-snug transition-colors ${
+                            isSelected ? "text-white" : "text-gray-300 group-hover:text-white"
+                          }`}
+                        >
+                          {evt.title}
+                        </h4>
+                        <p className="text-[11px] text-gray-400 font-medium line-clamp-1 mt-0.5">
+                          {evt.subtitle}
+                        </p>
+                      </div>
+
+                      {isSelected && (
+                        <div className="absolute top-2 right-2 w-2 h-2 rounded-full bg-[#d4af37] animate-ping" />
+                      )}
+                    </label>
+                  );
+                })}
+              </div>
+            </div>
+
             {/* Participation Choice */}
-            <div className="md:col-span-2 space-y-6">
+            <div className="md:col-span-2 space-y-4 pt-2">
               <label className="text-sm font-bold text-[#d4af37] uppercase tracking-widest pl-1">
                 APPLY AS
               </label>
 
-              <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6 pt-4">
-                {[
-                  { id: "nominated as award", prefix: "Apply for", highlight: "Awarded", primary: true },
-                  { id: "attend as speaker", prefix: "Attend as", highlight: "Speaker", primary: false },
-                  { id: "attend as exhibitor", prefix: "Attend as", highlight: "Exhibitor", primary: false },
-                  { id: "attend as sponsor", prefix: "Attend as", highlight: "Sponsor", primary: false },
-                ].map((type) => (
+              <div className={`grid ${isWomenSelected ? "grid-cols-2 sm:grid-cols-3 lg:grid-cols-6" : "grid-cols-2 lg:grid-cols-4"} gap-3 sm:gap-4 pt-2`}>
+                {participationOptions.map((type) => (
                   <label
                     key={type.id}
-                    className={`group relative flex flex-col items-center justify-center p-4 sm:p-8 rounded-xl sm:rounded-3xl border-2 cursor-pointer transition-all duration-500 overflow-hidden
+                    className={`group relative flex flex-col items-center justify-center p-3 sm:p-6 rounded-xl sm:rounded-2xl border-2 cursor-pointer transition-all duration-500 overflow-hidden
                       ${form.participationType === type.id
                         ? type.primary
-                          ? "bg-gradient-to-br from-[#d4af37] via-[#f2d06b] to-[#b8860b] border-transparent text-black scale-[1.05] shadow-[0_20px_40px_rgba(212,175,55,0.4)] ring-4 ring-[#d4af37]/20"
-                          : "bg-gradient-to-br from-[#c62828] via-[#e53935] to-[#b71c1c] border-transparent text-white scale-[1.05] shadow-[0_20px_40px_rgba(198,40,40,0.4)] ring-4 ring-red-500/20"
+                          ? "bg-gradient-to-br from-[#d4af37] via-[#f2d06b] to-[#b8860b] border-transparent text-black scale-[1.03] shadow-[0_20px_40px_rgba(212,175,55,0.4)] ring-4 ring-[#d4af37]/20"
+                          : "bg-gradient-to-br from-[#c62828] via-[#e53935] to-[#b71c1c] border-transparent text-white scale-[1.03] shadow-[0_20px_40px_rgba(198,40,40,0.4)] ring-4 ring-red-500/20"
                         : "bg-white/5 border-white/10 text-gray-400 hover:bg-white/10 hover:border-[#d4af37]/40 hover:scale-[1.02] shadow-xl"
                       }`}
                   >
@@ -378,10 +518,10 @@ export default function NominationForm() {
                     <div className="absolute inset-0 bg-gradient-to-tr from-white/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
 
                     <div className="relative z-10 flex flex-col items-center text-center">
-                      <span className={`text-[8px] sm:text-xs font-bold uppercase tracking-widest mb-1 transition-colors duration-300 ${form.participationType === type.id ? "opacity-90" : "text-gray-500"}`}>
+                      <span className={`text-[8px] sm:text-xs font-bold uppercase tracking-widest mb-1 transition-colors duration-300 ${form.participationType === type.id ? (type.primary ? "opacity-90 text-black/70" : "opacity-90 text-white/80") : "text-gray-500"}`}>
                         {type.prefix}
                       </span>
-                      <span className={`text-sm sm:text-2xl font-black uppercase tracking-tighter leading-none transition-all duration-300 ${form.participationType === type.id ? "scale-110" : "text-[#d4af37] drop-shadow-[0_2px_4px_rgba(0,0,0,0.5)]"}`}>
+                      <span className={`text-xs sm:text-base lg:text-lg font-black uppercase tracking-tight leading-tight transition-all duration-300 ${form.participationType === type.id ? "scale-105" : "text-[#d4af37] drop-shadow-[0_2px_4px_rgba(0,0,0,0.5)]"}`}>
                         {type.highlight}
                       </span>
                     </div>
@@ -617,12 +757,23 @@ export default function NominationForm() {
             ) : (
               <>
                 <div className="md:col-span-2 p-5 sm:p-8 rounded-3xl bg-gradient-to-br from-white/5 to-transparent border border-white/10 flex flex-col items-center">
-                  <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-[#d4af37]/20 flex items-center justify-center mb-6 border border-[#d4af37]/30 shadow-inner text-2xl">
-                    📝
+                  <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-[#d4af37]/20 flex items-center justify-center mb-6 border border-[#d4af37]/30 shadow-inner text-2xl sm:text-3xl">
+                    {form.participationType === "attend as ramp show" ? "💃" :
+                     form.participationType === "attend as special guest" ? "🌟" :
+                     form.participationType === "attend as speaker" ? "🎤" :
+                     form.participationType === "attend as exhibitor" ? "🏢" :
+                     form.participationType === "attend as sponsor" ? "💎" : "📝"}
                   </div>
                   <h3 className="text-xl sm:text-2xl font-bold text-[#d4af37] mb-2 uppercase tracking-tighter text-center">Registration Info</h3>
                   <p className="text-gray-400 text-xs sm:text-sm mb-8 text-center max-w-md italic">
-                    You are registering to attend as a {form.participationType.split(' ').pop()}. Our team will review your profile and reach out for coordination.
+                    You are registering to attend as {
+                      form.participationType === "attend as ramp show" ? "a Ramp Show Participant" :
+                      form.participationType === "attend as special guest" ? "a Special Guest" :
+                      form.participationType === "attend as speaker" ? "a Speaker" :
+                      form.participationType === "attend as exhibitor" ? "an Exhibitor" :
+                      form.participationType === "attend as sponsor" ? "a Sponsor" :
+                      form.participationType.split(' ').pop()
+                    }. Our team will review your profile and reach out for coordination.
                   </p>
 
                   <div className="w-full grid grid-cols-1 sm:grid-cols-2 gap-5 sm:gap-8">
