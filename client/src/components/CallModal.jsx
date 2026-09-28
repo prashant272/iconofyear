@@ -5,7 +5,7 @@ import { FaWhatsapp, FaVideo } from "react-icons/fa";
 export default function CallModal({ onClose }) {
     const phoneNumber = "+919821020995";
     const displayNumber = "+91 98210 20995";
-    const whatsappNumber = phoneNumber.replace(/\D/g, "");
+    const whatsappNumber = "919266392666";
 
     // Close modal on ESC key
     useEffect(() => {

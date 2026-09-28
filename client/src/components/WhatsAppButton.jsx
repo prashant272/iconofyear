@@ -5,7 +5,7 @@ import { FiChevronRight, FiMessageSquare } from "react-icons/fi";
 export default function WhatsAppButton() {
     const [isOpen, setIsOpen] = useState(false);
     const containerRef = useRef(null);
-    const whatsappNumber = "+919821020995";
+    const whatsappNumber = "+919266392666";
     const cleanNumber = whatsappNumber.replace(/\D/g, "");
 
     const options = [
