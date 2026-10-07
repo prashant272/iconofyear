@@ -29,8 +29,17 @@ const userSchema = new mongoose.Schema(
     },
     role: {
       type: String,
-      enum: ["user", "admin"],
+      enum: ["user", "admin", "subadmin"],
       default: "user",
+    },
+    allowedTabs: {
+      type: [String],
+      default: ["nominations"],
+    },
+    createdBy: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      default: null,
     },
     isVerified: {
       type: Boolean,

@@ -216,6 +216,11 @@ const nominationSchema = new mongoose.Schema(
       ref: "User",
       required: true,
     },
+    assignedTo: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      default: null,
+    },
     nominationType: {
       type: String,
       enum: [
@@ -254,6 +259,7 @@ const nominationSchema = new mongoose.Schema(
 // Helpful indexes for faster admin queries & filtering
 nominationSchema.index({ createdAt: -1 });
 nominationSchema.index({ user: 1, createdAt: -1 });
+nominationSchema.index({ assignedTo: 1, createdAt: -1 });
 nominationSchema.index({ status: 1, createdAt: -1 });
 nominationSchema.index({ paymentStatus: 1, createdAt: -1 });
 

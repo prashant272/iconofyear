@@ -6,7 +6,7 @@ import {
     updateEdition,
     deleteEdition,
 } from "../controllers/upcomingEditionController.js";
-import { authenticate, requireAdmin } from "../middleware/authMiddleware.js";
+import { authenticate, requireTabPermission } from "../middleware/authMiddleware.js";
 import uploadAndCompress from "../middleware/imageUploadMiddleware.js";
 
 const router = express.Router();
@@ -19,7 +19,7 @@ router.get("/:year", getEditionByYear);
 router.post(
     "/",
     authenticate,
-    requireAdmin,
+    requireTabPermission("upcoming-editions"),
     ...uploadAndCompress("images", 100), // Allow up to 100 images per upload
     createEdition
 );
@@ -27,11 +27,11 @@ router.post(
 router.put(
     "/:id",
     authenticate,
-    requireAdmin,
+    requireTabPermission("upcoming-editions"),
     ...uploadAndCompress("newImages", 100), // Allow uploading additional images during edit
     updateEdition
 );
 
-router.delete("/:id", authenticate, requireAdmin, deleteEdition);
+router.delete("/:id", authenticate, requireTabPermission("upcoming-editions"), deleteEdition);
 
 export default router;
