@@ -127,6 +127,39 @@ export function deleteNomination(id, token) {
   return request(`/api/admin/nominations/${id}`, { method: "DELETE", token });
 }
 
+export function assignNomination(id, assignedTo, token) {
+  return request(`/api/admin/nominations/${id}/assign`, {
+    method: "PATCH",
+    body: { assignedTo },
+    token,
+  });
+}
+
+/* ---------------- Sub-Admins (Team Management) ---------------- */
+export function fetchSubAdmins(token) {
+  return request("/api/admin/subadmins", { method: "GET", token });
+}
+
+export function createSubAdmin(payload, token) {
+  return request("/api/admin/subadmins", {
+    method: "POST",
+    body: payload,
+    token,
+  });
+}
+
+export function updateSubAdmin(id, payload, token) {
+  return request(`/api/admin/subadmins/${id}`, {
+    method: "PATCH",
+    body: payload,
+    token,
+  });
+}
+
+export function deleteSubAdmin(id, token) {
+  return request(`/api/admin/subadmins/${id}`, { method: "DELETE", token });
+}
+
 /* ---------------- Previous Editions ---------------- */
 export function fetchPreviousEditions() {
   return request("/api/previous-editions", { method: "GET" });

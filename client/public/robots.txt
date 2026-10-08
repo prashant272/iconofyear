@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://indianiconoftheyear.in/sitemap.xml
+Sitemap: https://www.iconoftheyearawards.com/sitemap.xml

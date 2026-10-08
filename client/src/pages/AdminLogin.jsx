@@ -28,7 +28,7 @@ export default function AdminLogin() {
   };
 
   useEffect(() => {
-    if (isAuthenticated && user?.role === "admin") {
+    if (isAuthenticated && (user?.role === "admin" || user?.role === "subadmin")) {
       const from = location.state?.from?.pathname || "/admin";
       navigate(from, { replace: true });
     }
@@ -59,12 +59,12 @@ export default function AdminLogin() {
               {/* Form for Admin Credentials submission */}
               <form onSubmit={handleSubmit} className="space-y-6">
                 <div className="space-y-2 group">
-                  <label className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-indigo-400/60 group-focus-within:text-indigo-400 transition-colors ml-1">
+                  <label className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-indigo-300 group-focus-within:text-indigo-200 transition-colors ml-1">
                     <FiMail /> Administrator ID
                   </label>
                   <input
                     type="email"
-                    className="w-full bg-white/[0.03] border border-white/10 rounded-2xl px-6 py-4 text-white text-base placeholder:text-white/10 focus:outline-none focus:border-indigo-500/40 focus:bg-white/[0.06] transition-all"
+                    className="w-full bg-[#030919] border border-white/20 rounded-2xl px-6 py-4 text-white text-base placeholder:text-slate-400 focus:outline-none focus:border-indigo-400 focus:bg-black/40 transition-all font-medium"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     required
@@ -74,16 +74,16 @@ export default function AdminLogin() {
 
                 <div className="space-y-2 group">
                   <div className="flex justify-between items-center px-1">
-                    <label className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-[#d4af37]/70 group-focus-within:text-[#d4af37] transition-colors ml-1">
+                    <label className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-amber-300 group-focus-within:text-amber-200 transition-colors ml-1">
                       <FiLock /> Security Key
                     </label>
-                    <Link to="/forgot-password" size="xs" className="text-[9px] font-black uppercase tracking-widest text-indigo-100/30 hover:text-indigo-400 transition-colors">
+                    <Link to="/forgot-password" size="xs" className="text-[9px] font-black uppercase tracking-widest text-indigo-300 hover:text-white transition-colors">
                       Forgot?
                     </Link>
                   </div>
                   <input
                     type="password"
-                    className="w-full bg-white/[0.03] border border-white/10 rounded-2xl px-6 py-4 text-white text-base placeholder:text-white/10 focus:outline-none focus:border-[#d4af37]/40 focus:bg-white/[0.06] transition-all"
+                    className="w-full bg-[#030919] border border-white/20 rounded-2xl px-6 py-4 text-white text-base placeholder:text-slate-400 focus:outline-none focus:border-amber-400 focus:bg-black/40 transition-all font-medium"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     required
@@ -117,12 +117,12 @@ export default function AdminLogin() {
               </form>
 
               {/* Register Redirection Link for initial setup */}
-              <div className="mt-12 pt-8 border-t border-white/5 text-center">
-                <p className="text-indigo-200/20 text-[10px] font-black uppercase tracking-widest">
+              <div className="mt-12 pt-8 border-t border-white/10 text-center">
+                <p className="text-slate-300 text-[10px] font-black uppercase tracking-widest">
                   Need access?{" "}
                   <Link
                     to="/admin/register"
-                    className="text-indigo-400 hover:text-white transition-colors ml-2 underline decoration-indigo-400/20"
+                    className="text-indigo-400 hover:text-white transition-colors ml-2 underline decoration-indigo-400/40"
                   >
                     Request Credentials
                   </Link>

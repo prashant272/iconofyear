@@ -104,7 +104,7 @@ export default function Contact() {
                         international education award
                       </a>
                       <a
-                        href="https://www.indianiconoftheyearawards.com/"
+                        href="https://www.iconoftheyearawards.com/"
                         target="_blank"
                         rel="noopener noreferrer"
                         className="text-sm font-semibold text-white hover:text-indigo-300 transition-colors duration-300 break-all"

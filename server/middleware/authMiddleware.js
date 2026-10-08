@@ -28,6 +28,38 @@ export function requireAdmin(req, res, next) {
   return next();
 }
 
+export function requireSuperAdmin(req, res, next) {
+  if (!req.user || req.user.role !== "admin") {
+    return res.status(403).json({ message: "Super admin privileges required" });
+  }
+  return next();
+}
+
+export function requireAdminOrSubadmin(req, res, next) {
+  if (!req.user || !["admin", "subadmin"].includes(req.user.role)) {
+    return res.status(403).json({ message: "Admin or Sub-Admin access required" });
+  }
+  return next();
+}
+
+export function requireTabPermission(tabName) {
+  return (req, res, next) => {
+    if (!req.user) {
+      return res.status(401).json({ message: "Unauthorized" });
+    }
+    if (req.user.role === "admin") {
+      return next();
+    }
+    if (req.user.role === "subadmin") {
+      const allowed = Array.isArray(req.user.allowedTabs) ? req.user.allowedTabs : [];
+      if (allowed.includes(tabName)) {
+        return next();
+      }
+    }
+    return res.status(403).json({ message: `Access denied to ${tabName}` });
+  };
+}
+
 export function signToken(payload) {
   return jwt.sign(payload, JWT_SECRET, {
     expiresIn: "7d",
